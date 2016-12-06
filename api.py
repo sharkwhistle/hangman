@@ -93,7 +93,7 @@ class HangmanApi(remote.Service):
             raise endpoints.ConflictException('Guess must be a leter!')
 
         if len(request.guess) > 1:
-            raise ConflictException('One at a time!')
+            raise endpoints.ConflictException('One at a time!')
 
         if request.guess in game.letters_guessed:
             raise endpoints.ConflictException('Letter already guessed!')
