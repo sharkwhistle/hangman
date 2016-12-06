@@ -1,4 +1,4 @@
-#Full Stack Nanodegree Project 4 Refresh
+#Full Stack Nanodegree Project 4 Design-A-Game
 
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
@@ -11,12 +11,14 @@
  
  
 ##Game Description:
-Guess a number is a simple guessing game. Each game begins with a random 'target'
-number between the minimum and maximum values provided, and a maximum number of
-'attempts'. 'Guesses' are sent to the `make_move` endpoint which will reply
-with either: 'too low', 'too high', 'you win', or 'game over' (if the maximum
+Hangman is a simple word guessing game. Each game begins with a random 'target'
+word, which is chosen from a predefined list of words. The player must make individual guesses, 
+as to the letters contained in this 'target' word, which are registered as 'attempts'. 
+'Guesses' are sent to the `make_move` endpoint which will reply
+with either: 'Letter already guessed!', 'That letter is in the target word!',
+'That letter is not in the target word!', 'You guessed the correct word!', or 'game over' (if the maximum
 number of attempts is reached).
-Many different Guess a Number games can be played by many different Users at any
+Many different Hangman games can be played by many different Users at any
 given time. Each game can be retrieved or played by using the path parameter
 `urlsafe_game_key`.
 
@@ -40,7 +42,7 @@ given time. Each game can be retrieved or played by using the path parameter
  - **new_game**
     - Path: 'game'
     - Method: POST
-    - Parameters: user_name, min, max, attempts
+    - Parameters: user_name, attempts
     - Returns: GameForm with initial game state.
     - Description: Creates a new Game. user_name provided must correspond to an
     existing user - will raise a NotFoundException if not. Min must be less than
@@ -62,6 +64,13 @@ given time. Each game can be retrieved or played by using the path parameter
     - Description: Accepts a 'guess' and returns the updated state of the game.
     If this causes a game to end, a corresponding Score entity will be created.
     
+ - **cancel_game**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: DELETE
+    - Parameters: urlsafe_game_key
+    - Returns: StringMessage of game state, depengin on whether or not the game is active.
+    - Description: Deletes current game by urlsafe_game_key if game is active.
+    
  - **get_scores**
     - Path: 'scores'
     - Method: GET
@@ -77,13 +86,26 @@ given time. Each game can be retrieved or played by using the path parameter
     - Description: Returns all Scores recorded by the provided player (unordered).
     Will raise a NotFoundException if the User does not exist.
     
- - **get_active_game_count**
-    - Path: 'games/active'
+ - **get_user_rankings**
+    - Path: 'user/rankings'
+    - Method: GET
+    - Parameters: user_name
+    - Returns: UserForms
+    - Description: Returns a user ranking form with all current users' win_percentages.
+    
+ - **get_game_history**
+    - Path: 'game/{urlsafe_game_key/history}'
+    - Method: GET
+    - Parameters: urlsafe_game_key
+    - Description: Returns a StringMessage of user game history, lsting guesses and attempts.
+    
+ - **get_average_attempts**
+    - Path: 'games/average_attempts'
     - Method: GET
     - Parameters: None
     - Returns: StringMessage
-    - Description: Gets the average number of attempts remaining for all games
-    from a previously cached memcache key.
+    - Description: Gets the average number of attempts for all users
+    from a previously cached memcache key
 
 ##Models Included:
  - **User**
@@ -100,7 +122,7 @@ given time. Each game can be retrieved or played by using the path parameter
     - Representation of a Game's state (urlsafe_key, attempts_remaining,
     game_over flag, message, user_name).
  - **NewGameForm**
-    - Used to create a new game (user_name, min, max, attempts)
+    - Used to create a new game (user_name, attempts)
  - **MakeMoveForm**
     - Inbound make move form (guess).
  - **ScoreForm**
@@ -109,4 +131,8 @@ given time. Each game can be retrieved or played by using the path parameter
  - **ScoreForms**
     - Multiple ScoreForm container.
  - **StringMessage**
-    - General purpose String container.
+    - General purpose String container.
+ - **UserForm**
+    - Form representation of User.
+ - **UserForms**
+    - Multiple UserForm container.
