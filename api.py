@@ -24,6 +24,7 @@ MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),)
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
+HIGH_SCORES = endpoints.ResourceContainer(number_of_results=messages.IntegerField(1))
 
 MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
 
@@ -163,8 +164,33 @@ class HangmanApi(remote.Service):
                     'A User with that name does not exist!')
         scores = Score.query(Score.user == user.key)
         return ScoreForms(items=[score.to_form() for score in scores])
+    
+    @endpoints.method(request_message=HIGH_SCORES,
+                      response_message=ScoreForms,
+                      path='highscores',
+                      name='get_high_scores',
+                      http_method='GET')
+    def get_high_scores(self, request):
+        """Returns Leaderboard of high scores"""
+        if request.number_of_results is not None:
+            scores = Score.query().order(Score.score).fetch(request.number_of_results)
+        else:
+            scores = Score.query().order(Score.score)
+        return ScoreForms(items=[score.to_form() for score in scores])
 
-
+    @endpoint.method(request_message=USER_REQUEST,
+                     response_method=UserForms,
+                     path='games/{user_name}',
+                     name='get_user_games',
+                     http_method='GET')
+    def get_user_games(self, request):
+        """Returns all user games"""
+        user = User.query(User.name == request.user_name).get()
+        if not user:
+            raise endpoints.NotFoundException('No user with that name!')
+        games = Game.query(Game.user == user.key, Game.game_over == False)
+        return GameForms(items=[game.to_form() for game in games])
+        
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=UserForms,
                       path='user/rankings',
