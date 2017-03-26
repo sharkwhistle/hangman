@@ -13,7 +13,7 @@ from google.appengine.api import taskqueue
 
 from models import User, Game, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
-    ScoreForms, UserForm, UserForms
+    ScoreForms, UserForm, UserForms, UserRankingForm, UserRankingForms
 from utils import get_by_urlsafe
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
@@ -25,6 +25,8 @@ MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
 HIGH_SCORES = endpoints.ResourceContainer(number_of_results=messages.IntegerField(1))
+
+USER_RANKINGS = endpoints.ResourceContainer()
 
 MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
 
@@ -191,8 +193,8 @@ class HangmanApi(remote.Service):
         games = Game.query(Game.user == user.key, Game.game_over == False)
         return GameForms(items=[game.to_form() for game in games])
         
-    @endpoints.method(request_message=USER_REQUEST,
-                      response_message=UserForms,
+    @endpoints.method(request_message=USER_RANKINGs,
+                      response_message=UserRankingForms,
                       path='user/rankings',
                       name='get_user_rankings',
                       http_method='GET')
@@ -200,7 +202,7 @@ class HangmanApi(remote.Service):
         """Return all user wins and win percentages"""
         users = User.query(User.total_games > 0).fetch()
         users = sorted(users, key=lambda x: x.win_percentage, reverse=True)
-        return UserForms(items=[user.to_form() for user in users])
+        return UserRankingForms(items=[user.to_form() for user in users])
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=StringMessage,
