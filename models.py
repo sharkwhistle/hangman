@@ -136,17 +136,29 @@ class ScoreForm(messages.Message):
     date = messages.StringField(2, required=True)
     won = messages.BooleanField(3, required=True)
     guesses = messages.IntegerField(4, required=True)
-
+    
 
 class ScoreForms(messages.Message):
     """Return multiple ScoreForms"""
     items = messages.MessageField(ScoreForm, 1, repeated=True)
 
-
+    
+class UserRankingForm(messages.Message):
+    """Return Form of User score rankings"""
+    user_name = messages.StringField(1, required=True)
+    avg_score = messages.FloatFiled(2, required=True)
+    
+    
+class UserRankingForms(messages.Message):
+    """Return multiple UserRankingForms"""
+    items = messages.Message(UserRankingForm, 1, repeated=True)
+    
+    
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""
     message = messages.StringField(1, required=True)
 
+    
 class UserForm(messages.Message):
     """Form representation of User information"""
     name = messages.StringField(1, required=True)
@@ -155,6 +167,7 @@ class UserForm(messages.Message):
     total_games = messages.IntegerField(4, required=True)
     win_percentage = messages.FloatField(5, required=True)
 
+    
 class UserForms(messages.Message):
     """Return multiple UserForms"""
     items = messages.MessageField(UserForm, 1, repeated=True)
